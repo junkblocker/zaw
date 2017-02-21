@@ -5,13 +5,14 @@
 # values work.
 
 function zaw-src-ssh-hosts(){
-  local -a _global_ssh_known_hosts _global_ssh_known_hosts2 _ssh_known_hosts _ssh_known_hosts2 _etc_hosts _ssh_config_hosts
+  local -a _global_ssh_known_hosts _global_ssh_known_hosts2 _ssh_known_hosts _ssh_known_hosts2 _etc_hosts _ssh_config_hosts _local_zsh_hosts
   [ -r /etc/ssh/ssh_known_hosts ] && _global_ssh_known_hosts=(${${${(f)"$(< /etc/ssh/ssh_known_hosts)"}%%\ *}%%,*}) 2>/dev/null || _global_ssh_known_hosts=()
   [ -r /etc/ssh/ssh_known_hosts2 ] && _global_ssh_known_hosts2=(${${${(f)"$(< /etc/ssh/ssh_known_hosts2)"}%%\ *}%%,*}) 2>/dev/null || _global_ssh_known_hosts2=()
   [ -r "$HOME/.ssh/known_hosts" ] && _ssh_known_hosts=(${${${(f)"$(< ~/.ssh/known_hosts)"}%%\ *}%%,*}) 2>/dev/null || _ssh_known_hosts=()
   [ -r "$HOME/.ssh/known_hosts2" ] && _ssh_known_hosts=(${${${(f)"$(< ~/.ssh/known_hosts2)"}%%\ *}%%,*}) 2>/dev/null || _ssh_known_hosts2=()
   [ -r /etc/hosts ] && : ${(A)_etc_hosts:=${(s: :)${(ps:\t:)${${(f)~~"$(</etc/hosts)"}%%\#*}##[:blank:]#[^[:blank:]]#}}} || _etc_hosts=()
   [ -r "$HOME/.ssh/config" ] && _ssh_config_hosts=(${${${(@M)${(f)"$(< ~/.ssh/config)"}:#Host *}#Host }:#*[*?]*}) || _ssh_config_hosts=()
+  [ -r "$HOME/.local/.zsh_hosts" ] && . "$HOME/.local/.zsh_hosts" && _local_zsh_hosts=("$hosts[@]") || _local_zsh_hosts=()
   candidates=(
     $_global_ssh_known_hosts[@]
     $_global_ssh_known_hosts2[@]
@@ -19,6 +20,7 @@ function zaw-src-ssh-hosts(){
     $_ssh_known_hosts2[@]
     $_etc_hosts[@]
     $_ssh_config_hosts[@]
+    $_local_zsh_hosts[@]
     "$HOST"
     ::1
     localhost

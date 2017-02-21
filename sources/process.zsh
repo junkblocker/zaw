@@ -2,11 +2,12 @@
 
 function zaw-src-process () {
     local ps_list title ps pid_list
-    if [ $(uname) = "Darwin" ] ; then       # for Macintosh
-        ps_list="$(ps aux | awk '$11 !~ /^\[/ {print $0}')"              # filter out kernel processes
-    else
-        ps_list="$(ps -aux --sort args | awk '$11 !~ /^\[/ {print $0}')" # filter out kernel processes
-    fi
+
+    # filter out kernel processes
+    case "${OSTYPE:l}" in
+        darwin*|bsd*) ps_list="$(ps aux              | awk '$11 !~ /^\[/ {print $0}')" ;;
+        *)            ps_list="$(ps -aux --sort args | awk '$11 !~ /^\[/ {print $0}')" ;;
+    esac
     title="${${(f)ps_list}[1]}"
     ps="$(echo $ps_list | sed '1d')"
     pid_list="$(echo $ps | awk '{print $2}')"
@@ -18,7 +19,7 @@ function zaw-src-process () {
 }
 
 function zaw-src-process-kill () {
-    local user="$(ps -ho user $1)"
+    local user="$(ps -ho user= $1)"
     if [[ -z $user ]]; then
         echo "process with PID=$1 is not found"
         return 1
